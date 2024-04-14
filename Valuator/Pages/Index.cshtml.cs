@@ -22,6 +22,11 @@ public class IndexModel : PageModel
 
     public IActionResult OnPost(string text)
     {
+        if (string.IsNullOrEmpty(text))
+        {
+            return BadRequest("Text cannot be empty!");
+        }
+
         _logger.LogDebug(text);
 
         string id = Guid.NewGuid().ToString();
