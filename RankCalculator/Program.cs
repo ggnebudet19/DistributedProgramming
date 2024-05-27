@@ -19,7 +19,7 @@ namespace RankCalculator
                     string message = Encoding.UTF8.GetString(args.Message.Data);
                     Console.WriteLine("Consuming: {0} from subject {1}", message, args.Message.Subject);
 
-                    ProcessMessage(message);
+                    ProcessMessage(message, c);
                 });
 
                 s.Start();
@@ -34,7 +34,7 @@ namespace RankCalculator
             }
         }
 
-        private static void ProcessMessage(string message)
+        private static void ProcessMessage(string message, IConnection natsConnection)
         {
             var parts = message.Split(':');
             if (parts.Length != 2) return;
@@ -52,6 +52,10 @@ namespace RankCalculator
 
             string rankKey = "RANK-" + id;
             db.StringSet(rankKey, rank);
+
+            string rankMessage = $"{id}:{rank}";
+            byte[] rankData = Encoding.UTF8.GetBytes(rankMessage);
+            natsConnection.Publish("valuator.events.rank", rankData);
         }
     }
 }

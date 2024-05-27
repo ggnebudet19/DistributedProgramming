@@ -38,14 +38,19 @@ public class IndexModel : PageModel
         IDatabase db = _redis.GetDatabase();
         db.StringSet(textKey, text);
 
-        string message = $"{id}:{text}";
-        byte[] data = Encoding.UTF8.GetBytes(message);
-        _natsConnection.Publish("valuator.processing.rank", data);
-        _logger.LogInformation($"Message sent to NATS: {message}");
+        string rankMessage = $"{id}:{text}";
+        byte[] rankData = Encoding.UTF8.GetBytes(rankMessage);
+        _natsConnection.Publish("valuator.processing.rank", rankData);
+        _logger.LogInformation($"Message sent to NATS: {rankMessage}");
 
         string similarityKey = "SIMILARITY-" + id;
         int similarity = TextEvaluator.CalculateSimilarity(text, db, textKey);
         db.StringSet(similarityKey, similarity);
+
+        string similarityMessage = $"{id}:{similarity}";
+        byte[] similarityData = Encoding.UTF8.GetBytes(similarityMessage);
+        _natsConnection.Publish("valuator.events.similarity", similarityData);
+        _logger.LogInformation($"SimilarityCalculated event published: {similarityMessage}");
 
         return Redirect($"summary?id={id}");
     }
