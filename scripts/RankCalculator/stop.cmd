@@ -1,4 +1,5 @@
 @echo off
-setlocal
-taskkill /IM dotnet.exe /F
-endlocal
+
+taskkill /f /im dotnet.exe
+
+taskkill /f /im cmd.exe
