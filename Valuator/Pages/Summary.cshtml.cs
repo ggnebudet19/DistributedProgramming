@@ -21,8 +21,9 @@ public class SummaryModel : PageModel
 
     public double Rank { get; set; }
     public double Similarity { get; set; }
+    public bool IsReady { get; set; }
 
-    public void OnGet(string id)
+    public async Task<IActionResult> OnGet(string id)
     {
         _logger.LogDebug(id);
 
@@ -31,15 +32,27 @@ public class SummaryModel : PageModel
         string rankKey = "RANK-" + id;
         string similarityKey = "SIMILARITY-" + id;
 
-        if (db.KeyExists(rankKey) && db.KeyExists(similarityKey))
+        for (int i = 0; i < 10; i++)
         {
-            Rank = ((double)db.StringGet(rankKey));
-            Similarity = ((double)db.StringGet(similarityKey));
+            if (db.KeyExists(rankKey) && db.KeyExists(similarityKey))
+            {
+                Rank = (double)db.StringGet(rankKey);
+                Similarity = (double)db.StringGet(similarityKey);
+                IsReady = true;
+                break;
+            }
+
+            await Task.Delay(200);
         }
-        else
+
+        if (!IsReady)
         {
             _logger.LogError("Values not found for ID: {id}", id);
+            Rank = 0;
+            Similarity = 0;
         }
+
+        return Page();
     }
 }
 

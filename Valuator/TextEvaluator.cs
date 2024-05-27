@@ -4,14 +4,6 @@ namespace Valuator
 {
     public class TextEvaluator
     {
-        public static double CalculateRank(string text)
-        {
-            int totalCharacters = text.Length;
-            int nonAlphabeticCharacters = text.Count(c => !char.IsLetter(c));
-
-            return (double)nonAlphabeticCharacters / totalCharacters;
-        }
-
         public static int CalculateSimilarity(string text, IDatabase db, string currentKey)
         {
             if (IsDuplicate(text, db, currentKey))
