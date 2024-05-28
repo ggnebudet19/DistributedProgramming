@@ -6,10 +6,8 @@ start cmd /k dotnet run --urls "http://0.0.0.0:5002"
 
 cd "../RankCalculator"
 start cmd /k dotnet run
-start cmd /k dotnet run
 
 cd "../EventsLogger"
-start cmd /k dotnet run
 start cmd /k dotnet run
 start cmd /k dotnet run
 
