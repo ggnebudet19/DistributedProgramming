@@ -40,10 +40,13 @@ namespace RankCalculator
             if (parts.Length != 2) return;
 
             string id = parts[0];
-            string text = parts[1];
+            string textKey = parts[1];
 
             ConnectionMultiplexer redis = ConnectionMultiplexer.Connect("127.0.0.1:6379");
             IDatabase db = redis.GetDatabase();
+
+            string text = db.StringGet(textKey);
+            if (text == null) return;
 
             int totalCharacters = text.Length;
             int nonAlphabeticCharacters = text.Count(c => !char.IsLetter(c));

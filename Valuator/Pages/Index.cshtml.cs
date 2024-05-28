@@ -38,7 +38,7 @@ public class IndexModel : PageModel
         IDatabase db = _redis.GetDatabase();
         db.StringSet(textKey, text);
 
-        string message = $"{id}:{text}";
+        string message = $"{id}:{textKey}";
         byte[] data = Encoding.UTF8.GetBytes(message);
         _natsConnection.Publish("valuator.processing.rank", data);
         _logger.LogInformation($"Message sent to NATS: {message}");
