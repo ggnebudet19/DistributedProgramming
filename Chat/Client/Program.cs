@@ -1,11 +1,55 @@
 ﻿using System;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
-namespace Chat.Client
+namespace Client
 {
     class Program
     {
+        public static void StartClient(string host, int port, string message)
+        {
+            try
+            {
+                IPAddress ipAddress = IPAddress.Loopback;
+                IPEndPoint remoteEP = new IPEndPoint(ipAddress, port);
+
+                Socket sender = new Socket(
+                                ipAddress.AddressFamily,
+                                SocketType.Stream,
+                                ProtocolType.Tcp);
+
+                try
+                {
+                    sender.Connect(remoteEP);
+                    Console.WriteLine("Удалённый адрес подключения сокета: {0}",
+                                      sender?.RemoteEndPoint?.ToString() ?? "Адрес недоступен");
+
+                    byte[] msg = Encoding.UTF8.GetBytes(message);
+                    if (sender == null)
+                    {
+                        throw new ArgumentNullException(nameof(sender));
+                    }
+                    sender.Send(msg);
+
+                    byte[] buf = new byte[1024];
+                    int bytesRec = sender.Receive(buf);
+                    Console.WriteLine("История сообщений:\n{0}", Encoding.UTF8.GetString(buf, 0, bytesRec));
+
+                    sender.Shutdown(SocketShutdown.Both);
+                    sender.Close();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("Exception : {0}", e.ToString());
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
+        }
+
         static void Main(string[] args)
         {
             if (args.Length != 3)
@@ -18,27 +62,13 @@ namespace Chat.Client
             int port = int.Parse(args[1]);
             string message = args[2];
 
-            try
+            if (string.IsNullOrEmpty(message))
             {
-                TcpClient client = new TcpClient(host, port);
-                NetworkStream stream = client.GetStream();
-
-                byte[] data = Encoding.UTF8.GetBytes(message);
-                stream.Write(data, 0, data.Length);
-
-                byte[] buffer = new byte[1024];
-                int bytesRead = stream.Read(buffer, 0, buffer.Length);
-                string response = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-
-                Console.WriteLine(response);
-
-                stream.Close();
-                client.Close();
+                Console.WriteLine("The message cannot be empty!");
+                return;
             }
-            catch (Exception e)
-            {
-                Console.WriteLine($"Error: {e.Message}");
-            }
+
+            StartClient(host, port, message);
         }
     }
 }
