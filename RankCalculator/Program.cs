@@ -37,12 +37,20 @@ namespace RankCalculator
         private static void ProcessMessage(string message, IConnection natsConnection)
         {
             var parts = message.Split(':');
-            if (parts.Length != 2) return;
+            if (parts.Length != 3) return;
 
             string id = parts[0];
             string text = parts[1];
+            string region = parts[2];
 
-            ConnectionMultiplexer redis = ConnectionMultiplexer.Connect("127.0.0.1:6379");
+            string? dbConnection = Environment.GetEnvironmentVariable($"DB_{region}");
+            if (string.IsNullOrEmpty(dbConnection))
+            {
+                return;
+            }
+            Console.WriteLine($"LOOKUP: {id}, {region}");
+
+            ConnectionMultiplexer redis = ConnectionMultiplexer.Connect(dbConnection);
             IDatabase db = redis.GetDatabase();
 
             int totalCharacters = text.Length;

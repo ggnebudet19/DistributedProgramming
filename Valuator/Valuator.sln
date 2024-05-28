@@ -7,6 +7,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Valuator", "Valuator.csproj
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RankCalculator", "..\RankCalculator\RankCalculator.csproj", "{7EA09720-9994-4E87-8DE6-1ADBE8B219DD}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EventsLogger", "..\EventsLogger\EventsLogger.csproj", "{93034448-9C48-4CF3-A956-9D5EAE22CBDE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Элементы решения", "Элементы решения", "{376B3C46-7381-4EC3-9A47-5EF6A02318C0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +25,10 @@ Global
 		{7EA09720-9994-4E87-8DE6-1ADBE8B219DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7EA09720-9994-4E87-8DE6-1ADBE8B219DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7EA09720-9994-4E87-8DE6-1ADBE8B219DD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{93034448-9C48-4CF3-A956-9D5EAE22CBDE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{93034448-9C48-4CF3-A956-9D5EAE22CBDE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{93034448-9C48-4CF3-A956-9D5EAE22CBDE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{93034448-9C48-4CF3-A956-9D5EAE22CBDE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

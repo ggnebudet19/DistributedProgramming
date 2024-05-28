@@ -1,22 +1,23 @@
-﻿using StackExchange.Redis;
+﻿using System.Data.Common;
+using StackExchange.Redis;
 
 namespace Valuator
 {
     public class TextEvaluator
     {
-        public static int CalculateSimilarity(string text, IDatabase db, string currentKey)
+        public static int CalculateSimilarity(string text, IDatabase db, string currentKey, string dbConnection)
         {
-            if (IsDuplicate(text, db, currentKey))
+            if (IsDuplicate(text, db, currentKey, dbConnection))
                 return 1;
             else
                 return 0;
         }
 
-        private static bool IsDuplicate(string text, IDatabase db, string currentKey)
+        private static bool IsDuplicate(string text, IDatabase db, string currentKey, string dbConnection)
         {
             const string textKeyPrefix = "TEXT-";
 
-            var textKeys = db.Multiplexer.GetServer("127.0.0.1:6379").Keys(pattern: textKeyPrefix + "*");
+            var textKeys = db.Multiplexer.GetServer(dbConnection).Keys(pattern: textKeyPrefix + "*");
 
             foreach (var key in textKeys)
             {

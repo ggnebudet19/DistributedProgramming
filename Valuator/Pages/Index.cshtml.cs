@@ -9,13 +9,11 @@ namespace Valuator.Pages;
 public class IndexModel : PageModel
 {
     private readonly ILogger<IndexModel> _logger;
-    private readonly ConnectionMultiplexer _redis;
     private readonly IConnection _natsConnection;
 
     public IndexModel(ILogger<IndexModel> logger)
     {
         _logger = logger;
-        _redis = ConnectionMultiplexer.Connect("127.0.0.1:6379");
         _natsConnection = new ConnectionFactory().CreateConnection();
     }
 
@@ -24,34 +22,45 @@ public class IndexModel : PageModel
 
     }
 
-    public IActionResult OnPost(string text)
+    public IActionResult OnPost(string text, string country)
     {
         if (string.IsNullOrEmpty(text))
         {
             return BadRequest("Text cannot be empty!");
         }
-        text = text.Trim();
-        _logger.LogDebug(text);
+        string region = CountryHandler.GetRegionByCountry(country);
+        string? dbConnection = Environment.GetEnvironmentVariable($"DB_{region}");
+        if (string.IsNullOrEmpty(dbConnection))
+        {
+            _logger.LogError($"No Redis configuration found for region {region}");
+            return StatusCode(500, "Server configuration error.");
+        }
+
+        ConnectionMultiplexer redis = ConnectionMultiplexer.Connect(dbConnection);
+        IDatabase db = redis.GetDatabase();
 
         string id = Guid.NewGuid().ToString();
         string textKey = "TEXT-" + id;
-        IDatabase db = _redis.GetDatabase();
+
+        _logger.LogInformation($"LOOKUP: {id}, {region}");
+
+        text = text.Trim();
         db.StringSet(textKey, text);
 
-        string rankMessage = $"{id}:{text}";
+        string rankMessage = $"{id}:{text}:{region}";
         byte[] rankData = Encoding.UTF8.GetBytes(rankMessage);
         _natsConnection.Publish("valuator.processing.rank", rankData);
-        _logger.LogInformation($"Message sent to NATS: {rankMessage}");
+
+        int similarity = TextEvaluator.CalculateSimilarity(text, db, textKey, dbConnection);
 
         string similarityKey = "SIMILARITY-" + id;
-        int similarity = TextEvaluator.CalculateSimilarity(text, db, textKey);
         db.StringSet(similarityKey, similarity);
 
         string similarityMessage = $"{id}:{similarity}";
         byte[] similarityData = Encoding.UTF8.GetBytes(similarityMessage);
         _natsConnection.Publish("valuator.events.similarity", similarityData);
-        _logger.LogInformation($"SimilarityCalculated event published: {similarityMessage}");
 
-        return Redirect($"summary?id={id}");
+        return Redirect($"summary?id={id}&region={region}");
     }
+
 }

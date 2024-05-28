@@ -6,28 +6,35 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Valuator.Pages;
 public class SummaryModel : PageModel
 {
     private readonly ILogger<SummaryModel> _logger;
-    private readonly ConnectionMultiplexer _redis;
 
     public SummaryModel(ILogger<SummaryModel> logger)
     {
         _logger = logger;
-        _redis = ConnectionMultiplexer.Connect("127.0.0.1:6379");
     }
 
     public double Rank { get; set; }
     public double Similarity { get; set; }
     public bool IsReady { get; set; }
 
-    public async Task<IActionResult> OnGet(string id)
+    public async Task<IActionResult> OnGet(string id, string region)
     {
-        _logger.LogDebug(id);
+        string? dbConnection = Environment.GetEnvironmentVariable($"DB_{region}");
+        if (string.IsNullOrEmpty(dbConnection))
+        {
+            _logger.LogError($"No Redis configuration found for region {region}");
+            return StatusCode(500, "Server configuration error.");
+        }
 
-        IDatabase db = _redis.GetDatabase();
+        _logger.LogInformation($"LOOKUP: {id}, {region}");
+
+        ConnectionMultiplexer redis = ConnectionMultiplexer.Connect(dbConnection);
+        IDatabase db = redis.GetDatabase();
 
         string rankKey = "RANK-" + id;
         string similarityKey = "SIMILARITY-" + id;
