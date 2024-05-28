@@ -40,7 +40,7 @@ namespace RankCalculator
             if (parts.Length != 3) return;
 
             string id = parts[0];
-            string text = parts[1];
+            string textKey = parts[1];
             string region = parts[2];
 
             string? dbConnection = Environment.GetEnvironmentVariable($"DB_{region}");
@@ -52,6 +52,9 @@ namespace RankCalculator
 
             ConnectionMultiplexer redis = ConnectionMultiplexer.Connect(dbConnection);
             IDatabase db = redis.GetDatabase();
+
+            string text = db.StringGet(textKey);
+            if (text == null) return;
 
             int totalCharacters = text.Length;
             int nonAlphabeticCharacters = text.Count(c => !char.IsLetter(c));

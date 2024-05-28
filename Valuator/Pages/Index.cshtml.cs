@@ -47,7 +47,7 @@ public class IndexModel : PageModel
         text = text.Trim();
         db.StringSet(textKey, text);
 
-        string rankMessage = $"{id}:{text}:{region}";
+        string rankMessage = $"{id}:{textKey}:{region}";
         byte[] rankData = Encoding.UTF8.GetBytes(rankMessage);
         _natsConnection.Publish("valuator.processing.rank", rankData);
 
